@@ -1,10 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:formvalidation/src/bloc/provider.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:formvalidation/src/models/producto_model.dart';
-import 'package:formvalidation/src/providers/productos_provider.dart';
+// import 'package:formvalidation/src/providers/productos_provider.dart';
 import 'package:formvalidation/src/utils/utils.dart' as utils;
 
 class ProductoPage extends StatefulWidget {
@@ -15,14 +16,17 @@ class ProductoPage extends StatefulWidget {
 class _ProductoPageState extends State<ProductoPage> {
   final formKey = GlobalKey<FormState>();
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final productoProvider = new ProductosProvider();
+  // final productoProvider = new ProductosProvider();
 
+  ProductosBloc productosBloc;
   ProductoModel producto = new ProductoModel();
   bool _guardando = false;
   File foto;
 
   @override
   Widget build(BuildContext context) {
+    productosBloc = Provider.productosBloc(context);
+
     final ProductoModel prodData = ModalRoute.of(context).settings.arguments;
     if (prodData != null) {
       producto = prodData;
@@ -128,13 +132,13 @@ class _ProductoPageState extends State<ProductoPage> {
     });
 
     if (foto != null) {
-      producto.fotoUrl = await productoProvider.subirImagen(foto);
+      producto.fotoUrl = await productosBloc.subirFoto(foto);
     }
 
     if (producto.id == null) {
-      productoProvider.crearProducto(producto);
+      productosBloc.agregarProducto(producto);
     } else {
-      productoProvider.editarProducto(producto);
+      productosBloc.editarProducto(producto);
     }
 
     // setState(() {_guardando = false; });
@@ -162,11 +166,17 @@ class _ProductoPageState extends State<ProductoPage> {
         fit: BoxFit.contain,
       );
     } else {
-      return Image(
-        image: AssetImage(foto?.path ?? 'assets/no-image.png'),
-        height: 300.0,
-        fit: BoxFit.cover,
-      );
+      return (foto == null)
+          ? Image(
+              image: AssetImage(foto?.path ?? 'assets/no-image.png'),
+              height: 300.0,
+              fit: BoxFit.cover,
+            )
+          : Image.file(
+              foto,
+              height: 300.0,
+              fit: BoxFit.cover,
+            );
     }
   }
 

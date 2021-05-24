@@ -23,16 +23,19 @@ class ProductosBloc {
     _cargandoController.sink.add(true);
     await _productosProvider.crearProducto(producto);
     _cargandoController.sink.add(false);
+    cargarProductos();
   }
 
   void editarProducto(ProductoModel producto) async {
     _cargandoController.sink.add(true);
     await _productosProvider.editarProducto(producto);
     _cargandoController.sink.add(false);
+    cargarProductos();
   }
 
   void borrarProducto(String id) async {
     await _productosProvider.borrarProducto(id);
+    cargarProductos();
   }
 
   Future<String> subirFoto(File foto) async {
